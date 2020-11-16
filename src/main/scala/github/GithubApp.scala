@@ -1,5 +1,6 @@
 package github
 
+import config.Config
 import sttp.client._
 import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
 import zio.console.putStrLn
@@ -8,6 +9,8 @@ import github.GithubClient.{ContributionsCollection, PullRequestContributionsByR
 import sttp.model.Header
 
 object GithubApp extends App {
+
+  val conf = new Config
 
   override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, ExitCode] = {
 
@@ -26,7 +29,7 @@ object GithubApp extends App {
     val uri = uri"https://api.github.com/graphql"
 
     SttpClient
-      .send(query.toRequest(uri))
+      .send(query.toRequest(uri).headers(Header("Authorization", conf.githubConfig.token)))
       .map(_.body)
       .absolve
       .tap(res => putStrLn(s"Result: $res"))
